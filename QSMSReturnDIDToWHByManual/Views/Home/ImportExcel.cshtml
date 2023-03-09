@@ -1,0 +1,111 @@
+﻿@*@model QSMSReturnDIDToWHByManual.Models.QSMS_DIDCheckTempInfo*@
+
+@model System.Data.DataTable
+@using System.Data;
+
+<script src="~/scripts/jquery-1.10.2.min.js"></script>
+<script>
+    function bs_input_file() {
+        $(".input-file").before(
+            function () {
+                if (!$(this).prev().hasClass('input-ghost')) {
+                    var element = $("<input type='file' id='dataFile' name='upload' class='input-ghost' style='visibility:hidden; height:0'>");
+                    element.attr("name", $(this).attr("name"));
+                    element.change(function () {
+                        element.next(element).find('input').val((element.val()).split('\\').pop());
+                    });
+                    $(this).find("button.btn-choose").click(function () {
+                        element.click();
+                    });
+                    $(this).find("button.btn-reset").click(function () {
+                        element.val(null);
+                        $(this).parents(".input-file").find('input').val('');
+                    });
+                    $(this).find('input').css("cursor", "pointer");
+                    $(this).find('input').mousedown(function () {
+                        $(this).parents('.input-file').prev().click();
+                        return false;
+                    });
+                    return element;
+                }
+            }
+        );
+    }
+
+    function clear() {
+        var input = $("#dataFile").val('');
+    };
+    $(function () {
+        clear();
+        bs_input_file();
+    });
+</script>
+
+@{
+    ViewBag.Title = "ImportExcel";
+}
+
+@using (Html.BeginForm("ImportExcel", "Home", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="info2">        
+        <h2><b><u>Import excel file</u></b></h2>
+        <br />
+        @Html.AntiForgeryToken()
+
+        <div class="form-group" style="display: inline-block; width: 100%; background-color: antiquewhite; border-radius: 5px">
+            <div name="Fichier1" style="padding:10px">
+                <!-- COMPONENT START -->
+                <div>
+                    <div class="input-group input-file">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default btn-choose" type="button">Choose</button>
+                        </span>
+                        <input type="text" class="form-control" placeholder='Choose a file...' />
+                    </div>
+                    <input type="submit" value="Upload" class="btn btn-default" style="font-weight: bold; background-color:mediumspringgreen"/>                    
+                </div>
+                @*<input type="file" id="dataFile" name="upload" />*@
+            </div>
+        </div>
+        
+        <div class="alert alert-danger">
+            @Html.ValidationSummary()
+            @*<strong></strong> asdasd*@
+        </div>
+
+        <b>@ViewBag.message</b>
+        @*These DID already send to QWMS.*@
+
+    </div>
+    if (Model != null)
+    {
+        <table id="table1" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    @foreach (DataColumn col in Model.Columns)
+                    {
+                        <th>@col.ColumnName</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (DataRow row in Model.Rows)
+                {
+                    <tr>
+                        @foreach (DataColumn col in Model.Columns)
+                        {
+                            <td>@row[col.ColumnName]</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+<script>
+    $(document).ready(function () {
+        $("#table1").DataTable();
+    });
+</script>
+
